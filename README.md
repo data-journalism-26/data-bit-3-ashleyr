@@ -68,4 +68,4 @@ Original data file: `TBL Data April 2 Tariffs 202504.xlsx` (downloadable from Ya
 
 ## View the Final Piece
 
-**[Click here to read the article](https://raw.githack.com/data-journalism-26/data-bit-3-ashleyr/main/index.html)**
+**[Click here to read the article](https://rawcdn.githack.com/data-journalism-26/data-bit-3-ashleyr/main/index.html)**
