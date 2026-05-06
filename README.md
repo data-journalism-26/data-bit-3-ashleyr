@@ -6,8 +6,6 @@
 
 ---
 
-## What I Did
-
 This Data Bit examines the distributional impact of the 2025 U.S. tariff package — specifically, who bears the cost as a share of income. The central argument: tariffs function as a regressive tax, hitting the poorest Americans 2.5 times harder than the wealthiest as a share of disposable income. A second chart shows *why*: the goods hit hardest — clothing, footwear, food — are necessities that low-income households cannot opt out of.
 
 ### Technique
@@ -68,6 +66,6 @@ Original data file: `TBL Data April 2 Tariffs 202504.xlsx` (downloadable from Ya
 
 ---
 
-## 🔗 View the Final Piece
+## View the Final Piece
 
-👉 **[Click here to read the article](https://raw.githack.com/data-journalism-26/data-bit-3-ashley-razo/main/index.html)**
+**[Click here to read the article](https://raw.githack.com/data-journalism-26/data-bit-3-ashleyr/main/index.html)**
