@@ -1,0 +1,11 @@
+decile,decile_label,burden_pct_income,annual_cost_usd
+1,Lowest 10%,-4.0,1700
+2,2nd decile,-4.0,1700
+3,3rd decile,-3.6,2100
+4,4th decile,-3.3,2400
+5,5th decile,-3.1,3000
+6,6th decile,-2.9,3300
+7,7th decile,-2.7,3700
+8,8th decile,-2.4,4200
+9,9th decile,-2.1,4800
+10,Top 10%,-1.6,8100
