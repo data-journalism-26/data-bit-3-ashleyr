@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Who Really Pays for the Tariffs?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    :root {
+      --bg:#F9F6F1; --ink:#1C1C1C; --muted:#666; --rule:#D8CFC4;
+      --red:#C0392B; --blue:#4A7EA5; --midblue:#7A9BB5;
+      --highlight:#FFF0E0; --mono:'DM Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;font-size:17px;line-height:1.8}
+    .topbar{background:var(--ink);color:#999;font-family:var(--mono);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;padding:.6rem 2rem;display:flex;justify-content:space-between}
+    .article{max-width:720px;margin:0 auto;padding:3rem 2rem 6rem}
+    .kicker{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--red);margin-bottom:1rem}
+    h1{font-family:'Libre Baskerville',Georgia,serif;font-size:clamp(2rem,5.5vw,3rem);font-weight:700;line-height:1.1;letter-spacing:-.02em;border-top:4px solid var(--ink);border-bottom:1px solid var(--rule);padding:1.25rem 0;margin-bottom:.5rem}
+    .deck{font-size:1.05rem;color:var(--muted);font-style:italic;border-bottom:1px solid var(--rule);padding-bottom:1rem;margin-bottom:1rem;font-family:'Libre Baskerville',serif}
+    .byline{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.08em;border-bottom:1px solid var(--rule);padding-bottom:1rem;margin-bottom:2rem}
+    .byline strong{color:var(--ink)}
+    p{margin-bottom:1.4rem}
+    a{color:var(--red)}
+    .drop-cap::first-letter{float:left;font-family:'Libre Baskerville',serif;font-size:4rem;font-weight:700;line-height:.8;margin:.1rem .15rem 0 0;color:var(--red)}
+    h2{font-family:'Libre Baskerville',serif;font-size:1.15rem;font-weight:700;border-top:1px solid var(--rule);padding-top:1.5rem;margin:2.5rem 0 .8rem}
+
+    /* Stat band */
+    .stat-band{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin:2.5rem 0}
+    .stat-cell{background:var(--bg);padding:1.25rem 1rem;text-align:center}
+    .stat-num{font-family:'Libre Baskerville',serif;font-size:2.2rem;font-weight:700;color:var(--red);display:block;line-height:1}
+    .stat-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-top:.4rem}
+
+    /* Pull quote */
+    .pull{border-left:4px solid var(--red);background:var(--highlight);padding:1rem 1.4rem;margin:2rem 0;font-family:'Libre Baskerville',serif;font-style:italic;font-size:1.15rem;line-height:1.45;color:#6b1a10}
+    .pull cite{display:block;font-size:.7rem;font-family:var(--mono);font-style:normal;color:var(--muted);margin-top:.5rem;letter-spacing:.06em}
+
+    /* Charts */
+    .chart-wrap{margin:2.5rem 0;border:1px solid var(--rule);background:white}
+    .chart-header{padding:1rem 1.2rem .5rem;border-bottom:1px solid var(--rule)}
+    .chart-title{font-family:'Libre Baskerville',serif;font-weight:700;font-size:.95rem;color:var(--ink)}
+    .chart-subtitle{font-family:var(--mono);font-size:.63rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+    .chart-body{padding:.75rem .5rem .25rem}
+    svg{display:block;width:100%;overflow:visible}
+    figcaption{padding:.65rem 1.2rem .9rem;font-family:var(--mono);font-size:.63rem;color:var(--muted);line-height:1.55;border-top:1px solid var(--rule)}
+    figcaption strong{color:var(--ink)}
+
+    /* Legend */
+    .legend{display:flex;gap:1.5rem;padding:.5rem 1.2rem;font-family:var(--mono);font-size:.65rem;color:var(--muted)}
+    .legend-item{display:flex;align-items:center;gap:.4rem}
+    .legend-swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+
+    /* Tooltip */
+    .tooltip{position:absolute;background:var(--ink);color:#f0f0f0;font-family:var(--mono);font-size:.68rem;padding:.5rem .8rem;pointer-events:none;opacity:0;transition:opacity .12s;line-height:1.6;z-index:100;max-width:260px}
+
+    /* Context note */
+    .context-note{background:white;border:1px solid var(--rule);padding:.9rem 1.2rem;margin:2.5rem 0;font-family:var(--mono);font-size:.7rem;color:var(--muted);line-height:1.6}
+    .context-note strong{color:var(--ink)}
+
+    /* Sources */
+    .sources{margin-top:3rem;padding-top:1.5rem;border-top:3px double var(--rule)}
+    .sources h3{font-family:var(--mono);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+    .sources ul{list-style:none}
+    .sources li{font-family:var(--mono);font-size:.67rem;color:var(--muted);padding:.35rem 0;border-bottom:1px solid var(--highlight);line-height:1.5}
+    .sources a{color:var(--red);text-decoration:none;word-break:break-all}
+    .sources a:hover{text-decoration:underline}
+
+    @media(max-width:480px){
+      .article{padding:1.5rem 1.2rem 4rem}
+      .stat-band{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <span>Data Bit · Trade & Economic Policy</span>
+  <span>Ashley Razo · May 2026</span>
+</div>
+
+<div class="tooltip" id="tt"></div>
+
+<main class="article">
+  <p class="kicker">Tariffs & Economic Inequality</p>
+  <h1>Who Really Pays for the Tariffs?</h1>
+  <p class="deck">The White House calls them a tax on foreign countries. The data tells a different story: America's 2025 tariffs function as a regressive tax, hitting the poorest households more than twice as hard as the wealthiest — and the things they raise prices on most are groceries, clothing, and shoes.</p>
+  <div class="byline">By <strong>Ashley Razo</strong> &nbsp;|&nbsp; May 2026</div>
+
+  <p class="drop-cap">When the Trump administration announced its sweeping tariff package in April 2025, officials framed it as a tool to make foreign exporters pay. "It's a tax on other countries," the president said. But economists studying who actually bears the cost have reached a different conclusion — one that has significant consequences for the roughly 40 million Americans living below the poverty line.</p>
+
+  <p>According to the Yale Budget Lab, a nonpartisan policy research center, the 2025 tariffs function as a regressive tax: the lower a household's income, the larger the share of that income lost to higher prices. The poorest tenth of Americans lose 4% of their disposable income. The wealthiest tenth lose 1.6%. The burden at the bottom is 2.5 times heavier, as a share of what people actually have to spend.</p>
+
+  <div class="stat-band">
+    <div class="stat-cell">
+      <span class="stat-num">4.0%</span>
+      <span class="stat-label">Disposable income lost — lowest earners</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-num">2.5×</span>
+      <span class="stat-label">Gap between poorest and wealthiest burden</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-num">22.5%</span>
+      <span class="stat-label">Average U.S. tariff rate — highest since 1909</span>
+    </div>
+  </div>
+
+  <!-- CHART 1: Burden by income decile -->
+  <figure class="chart-wrap" id="w1">
+    <div class="chart-header">
+      <div class="chart-title">Tariffs hit the poorest Americans hardest</div>
+      <div class="chart-subtitle">Disposable income lost from all 2025 U.S. tariffs, by income group · Hover bars for dollar amounts</div>
+    </div>
+    <div class="chart-body"><svg id="c1"></svg></div>
+    <figcaption>
+      <strong>Fig. 1.</strong> Share of disposable income lost per income decile under all 2025 U.S. tariffs,
+      ordered from lowest to highest earners. Short-run estimates before household substitution.
+      Dollar figures in 2024 dollars.
+      <em>Source: Yale Budget Lab, April 2, 2025. budgetlab.yale.edu</em>
+    </figcaption>
+  </figure>
+
+  <h2>Why the Poor Pay More</h2>
+
+  <p>The mechanism is straightforward. Tariffs raise prices on imported goods — and lower-income households spend a larger fraction of their income on goods than wealthier ones do. Wealthy households spend more in absolute dollars, but a much larger share of their budget goes to services: restaurants, travel, private healthcare, financial advice. None of those are touched by tariffs on physical imports.</p>
+
+  <p>What tariffs do affect — and affect most — are necessities. Clothing prices are projected to rise 17% under the full 2025 tariff package. Fresh produce is up 4%. Footwear, 14%. These are not discretionary purchases. A family earning $30,000 a year cannot opt out of buying clothes or food the way a family earning $300,000 can simply spend less on a new car.</p>
+
+  <div class="pull">
+    "Tariffs are a regressive tax. Lower-income households spend a larger fraction of their income than higher-income households do — and that gap is what drives the disparity."
+    <cite>— Yale Budget Lab, April 2025</cite>
+  </div>
+
+  <!-- CHART 2: Commodity price increases -->
+  <figure class="chart-wrap" id="w2">
+    <div class="chart-header">
+      <div class="chart-title">Clothing, food, and shoes face the steepest price hikes</div>
+      <div class="chart-subtitle">Estimated price increase by category under all 2025 U.S. tariffs · Hover bars for details</div>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#C0392B"></div>
+        <span>Necessity — disproportionate low-income budget share</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:#7A9BB5"></div>
+        <span>Other goods</span>
+      </div>
+    </div>
+    <div class="chart-body"><svg id="c2"></svg></div>
+    <figcaption>
+      <strong>Fig. 2.</strong> Estimated short-run price increases by commodity category, ordered by magnitude.
+      Red bars mark categories where low-income households spend a disproportionately large share of their budget.
+      Pharmaceuticals are partially exempt from tariffs as of publication.
+      <em>Source: Yale Budget Lab, April 2025 and October 2025 updates. budgetlab.yale.edu</em>
+    </figcaption>
+  </figure>
+
+  <h2>The Dollar Illusion</h2>
+
+  <p>Defenders of the tariff policy often point to dollar amounts rather than income shares — and by that measure, the numbers look very different. The wealthiest tenth of households lose an estimated $8,100 per year in purchasing power. The poorest tenth lose $1,700. That gap makes tariffs appear progressive in dollar terms: the rich pay more money.</p>
+
+  <p>But that framing conflates the cost of a policy with its burden. A household earning $25,000 a year losing $1,700 is losing nearly 7% of its income. A household earning $500,000 a year losing $8,100 is losing less than 2%. The percentage is what determines how much a policy actually constrains a family's life — whether they can afford the school supplies, the winter coat, the fresh vegetables.</p>
+
+  <div class="context-note">
+    <strong>A note on what these estimates include:</strong> Yale Budget Lab's figures model all U.S. tariffs enacted through April 2, 2025 — including tariffs on China, Canada, Mexico, automobiles, and steel and aluminum — as well as announced retaliation from trading partners. These are short-run estimates that assume full pass-through of tariff costs to consumer prices before households adjust their spending. Long-run estimates, which account for substitution, show a smaller but still regressive burden.
+  </div>
+
+  <p>The average effective U.S. tariff rate hit 22.5% in 2025 — the highest since 1909. Subsequent legal challenges reduced that rate after a Supreme Court ruling in February 2026, but the Section 232 tariffs on steel, aluminum, and automobiles remain in place, and new tariffs have been introduced under alternative legal authorities. The distributional structure of the burden has not changed: those with the least continue to pay the most, as a share of what they have.</p>
+
+  <div class="sources">
+    <h3>Sources & Data</h3>
+    <ul>
+      <li>Yale Budget Lab, <em>Where We Stand: Distributional Effects of All U.S. Tariffs Enacted in 2025 Through April 2</em> — <a href="https://budgetlab.yale.edu/research/where-we-stand-fiscal-economic-and-distributional-effects-all-us-tariffs-enacted-2025-through-april">budgetlab.yale.edu</a></li>
+      <li>Yale Budget Lab, <em>State of U.S. Tariffs: October 30, 2025</em> — <a href="https://budgetlab.yale.edu/research/state-us-tariffs-october-30-2025">budgetlab.yale.edu</a></li>
+      <li>Tax Foundation, <em>Tracking the Economic Impact of the Trump Tariffs</em> — <a href="https://taxfoundation.org/research/all/federal/trump-tariffs-trade-war/">taxfoundation.org</a></li>
+      <li>Federal Reserve Bank of Dallas, <em>Effects of Realized Tariff Changes on PCE Prices</em> (May 2026) — <a href="https://www.dallasfed.org/research/economics/2026/0505-mau">dallasfed.org</a></li>
+      <li>Raw data & R code — <a href="https://github.com/data-journalism-26/data-bit-3-ashley-razo">github.com/data-journalism-26/data-bit-3-ashley-razo</a></li>
+    </ul>
+  </div>
+</main>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const income = [
+  {label:"Lowest 10%", decile:1,  pct:4.0, cost:1700,  group:"bottom"},
+  {label:"2nd decile",  decile:2,  pct:4.0, cost:1700,  group:"bottom"},
+  {label:"3rd decile",  decile:3,  pct:3.6, cost:2100,  group:"middle"},
+  {label:"4th decile",  decile:4,  pct:3.3, cost:2400,  group:"middle"},
+  {label:"5th decile",  decile:5,  pct:3.1, cost:3000,  group:"middle"},
+  {label:"6th decile",  decile:6,  pct:2.9, cost:3300,  group:"middle"},
+  {label:"7th decile",  decile:7,  pct:2.7, cost:3700,  group:"middle"},
+  {label:"8th decile",  decile:8,  pct:2.4, cost:4200,  group:"middle"},
+  {label:"9th decile",  decile:9,  pct:2.1, cost:4800,  group:"middle"},
+  {label:"Top 10%",     decile:10, pct:1.6, cost:8100,  group:"top"},
+].reverse(); // lowest at top of chart
+
+const commodity = [
+  {cat:"Apparel & textiles", pct:17.0, necessity:true},
+  {cat:"Footwear",           pct:14.2, necessity:true},
+  {cat:"Motor vehicles",     pct:8.4,  necessity:false},
+  {cat:"Electrical equip.",  pct:6.1,  necessity:false},
+  {cat:"Furniture",          pct:5.8,  necessity:false},
+  {cat:"Household appliances",pct:4.9, necessity:false},
+  {cat:"Fresh produce",      pct:4.0,  necessity:true},
+  {cat:"Food overall",       pct:2.8,  necessity:true},
+  {cat:"Pharmaceuticals",    pct:1.1,  necessity:true},
+].sort((a,b) => a.pct - b.pct);
+
+const RED="#C0392B", BLUE="#4A7EA5", MIDBLUE="#7A9BB5";
+const INK="#1C1C1C", MUTED="#999", GRID="#eee";
+const tt=document.getElementById("tt");
+const tip=(h,e)=>{tt.innerHTML=h;tt.style.opacity=1;mv(e)};
+const mv=e=>{tt.style.left=(e.pageX+14)+"px";tt.style.top=(e.pageY-28)+"px"};
+const hide=()=>{tt.style.opacity=0};
+
+// ── CHART 1: income decile bar chart ─────────────────────────
+(()=>{
+  const wrap=document.getElementById("w1");
+  const W=wrap.clientWidth-2, m={t:8,r:60,b:42,l:110};
+  const H=income.length*34+m.t+m.b, iW=W-m.l-m.r, iH=H-m.t-m.b;
+  const svg=d3.select("#c1").attr("viewBox",`0 0 ${W} ${H}`).attr("height",H);
+  const g=svg.append("g").attr("transform",`translate(${m.l},${m.t})`);
+
+  const x=d3.scaleLinear().domain([0,4.5]).range([0,iW]);
+  const y=d3.scaleBand().domain(income.map(d=>d.label)).range([0,iH]).padding(.25);
+
+  // Grid
+  g.append("g").selectAll("line").data(x.ticks(5)).join("line")
+    .attr("x1",d=>x(d)).attr("x2",d=>x(d)).attr("y1",0).attr("y2",iH)
+    .attr("stroke",GRID).attr("stroke-width",1);
+  g.append("line").attr("x1",0).attr("x2",0).attr("y1",0).attr("y2",iH)
+    .attr("stroke","#ccc").attr("stroke-width",1);
+
+  // Bars
+  g.selectAll(".bar").data(income).join("rect")
+    .attr("x",0).attr("y",d=>y(d.label))
+    .attr("width",d=>x(d.pct)).attr("height",y.bandwidth())
+    .attr("fill",d=>d.group==="bottom"?RED:d.group==="top"?BLUE:MIDBLUE)
+    .attr("opacity",.88).style("cursor","pointer")
+    .on("mouseover",function(e,d){
+      d3.select(this).attr("opacity",1);
+      tip(`<strong>${d.label}</strong><br>Income lost: ${d.pct}%<br>Annual cost: $${d.cost.toLocaleString()}`,e);
+    })
+    .on("mousemove",mv)
+    .on("mouseout",function(){d3.select(this).attr("opacity",.88);hide()});
+
+  // Value labels
+  g.selectAll(".lbl").data(income).join("text")
+    .attr("x",d=>x(d.pct)+5).attr("y",d=>y(d.label)+y.bandwidth()/2+4)
+    .text(d=>d.pct+"%")
+    .attr("fill",INK).attr("font-size","11px").attr("font-family","'DM Mono',monospace");
+
+  // Y axis
+  g.append("g").call(d3.axisLeft(y).tickSize(0))
+    .call(g=>g.select(".domain").remove())
+    .selectAll("text")
+    .attr("fill",d=>d==="Lowest 10%"?RED:d==="Top 10%"?BLUE:INK)
+    .attr("font-weight",d=>(d==="Lowest 10%"||d==="Top 10%")?"500":"300")
+    .attr("font-size","12px").attr("font-family","'DM Sans',sans-serif").attr("dx","-8");
+
+  // X axis
+  g.append("g").attr("transform",`translate(0,${iH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d=>d+"%"))
+    .call(g=>g.select(".domain").attr("stroke","#ccc"))
+    .call(g=>g.selectAll("text").attr("font-size","11px")
+      .attr("font-family","'DM Mono',monospace").attr("fill",MUTED))
+    .call(g=>g.selectAll(".tick line").attr("stroke","#ddd"));
+
+  g.append("text").attr("x",iW/2).attr("y",iH+34)
+    .attr("text-anchor","middle").attr("fill",MUTED)
+    .attr("font-size","11px").attr("font-family","'DM Mono',monospace")
+    .text("Disposable income lost (%)");
+})();
+
+// ── CHART 2: commodity price increases ───────────────────────
+(()=>{
+  const wrap=document.getElementById("w2");
+  const W=wrap.clientWidth-2, m={t:8,r:60,b:42,l:155};
+  const H=commodity.length*34+m.t+m.b, iW=W-m.l-m.r, iH=H-m.t-m.b;
+  const svg=d3.select("#c2").attr("viewBox",`0 0 ${W} ${H}`).attr("height",H);
+  const g=svg.append("g").attr("transform",`translate(${m.l},${m.t})`);
+
+  const x=d3.scaleLinear().domain([0,20]).range([0,iW]);
+  const y=d3.scaleBand().domain(commodity.map(d=>d.cat)).range([0,iH]).padding(.25);
+
+  g.append("g").selectAll("line").data(x.ticks(5)).join("line")
+    .attr("x1",d=>x(d)).attr("x2",d=>x(d)).attr("y1",0).attr("y2",iH)
+    .attr("stroke",GRID).attr("stroke-width",1);
+  g.append("line").attr("x1",0).attr("x2",0).attr("y1",0).attr("y2",iH)
+    .attr("stroke","#ccc").attr("stroke-width",1);
+
+  g.selectAll(".bar").data(commodity).join("rect")
+    .attr("x",0).attr("y",d=>y(d.cat))
+    .attr("width",d=>x(d.pct)).attr("height",y.bandwidth())
+    .attr("fill",d=>d.necessity?RED:MIDBLUE)
+    .attr("opacity",.88).style("cursor","pointer")
+    .on("mouseover",function(e,d){
+      d3.select(this).attr("opacity",1);
+      const note=d.necessity
+        ?"<br><span style='color:#ccc'>Necessity — high low-income budget share</span>":"";
+      tip(`<strong>${d.cat}</strong><br>Price increase: +${d.pct}%${note}`,e);
+    })
+    .on("mousemove",mv)
+    .on("mouseout",function(){d3.select(this).attr("opacity",.88);hide()});
+
+  g.selectAll(".lbl").data(commodity).join("text")
+    .attr("x",d=>x(d.pct)+5).attr("y",d=>y(d.cat)+y.bandwidth()/2+4)
+    .text(d=>"+"+d.pct+"%")
+    .attr("fill",INK).attr("font-size","11px").attr("font-family","'DM Mono',monospace");
+
+  g.append("g").call(d3.axisLeft(y).tickSize(0))
+    .call(g=>g.select(".domain").remove())
+    .selectAll("text")
+    .attr("fill",d=>commodity.find(c=>c.cat===d)?.necessity?RED:INK)
+    .attr("font-size","12px").attr("font-family","'DM Sans',sans-serif").attr("dx","-8");
+
+  g.append("g").attr("transform",`translate(0,${iH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d=>"+"+d+"%"))
+    .call(g=>g.select(".domain").attr("stroke","#ccc"))
+    .call(g=>g.selectAll("text").attr("font-size","11px")
+      .attr("font-family","'DM Mono',monospace").attr("fill",MUTED))
+    .call(g=>g.selectAll(".tick line").attr("stroke","#ddd"));
+
+  g.append("text").attr("x",iW/2).attr("y",iH+34)
+    .attr("text-anchor","middle").attr("fill",MUTED)
+    .attr("font-size","11px").attr("font-family","'DM Mono',monospace")
+    .text("Estimated price increase (%)");
+})();
+</script>
+</body>
+</html>
